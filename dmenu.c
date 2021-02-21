@@ -28,6 +28,11 @@
 /* enums */
 enum { SchemeNorm, SchemeSel, SchemeOut, SchemeLast }; /* color schemes */
 
+enum BarType { 
+    TOP_BAR, 
+    CENTER_BAR, 
+    BOTTOM_BAR,
+};
 struct item {
 	char *text;
 	struct item *left, *right;
@@ -637,9 +642,14 @@ setup(void)
 				if (INTERSECT(x, y, 1, 1, info[i]))
 					break;
 
-		x = info[i].x_org;
-		y = info[i].y_org + (topbar ? 0 : info[i].height - mh);
-		mw = info[i].width;
+		x = info[i].x_org + (info[i].width*bar_width_fact)/2;
+        if (bar_type == TOP_BAR) 
+            y = info[i].y_org;
+        else if (bar_type == CENTER_BAR)
+            y = info[i].y_org + info[i].height/2 - mh;
+        else
+            y = info[i].y_org + (info[i].height - mh);
+		mw = info[i].width/2;
 		XFree(info);
 	} else
 #endif
@@ -647,10 +657,16 @@ setup(void)
 		if (!XGetWindowAttributes(dpy, parentwin, &wa))
 			die("could not get embedding window attributes: 0x%lx",
 			    parentwin);
-		x = 0;
-		y = topbar ? 0 : wa.height - mh;
-		mw = wa.width;
+		x = wa.width * bar_width_fact;
+        if (bar_type == TOP_BAR)
+            y = 0;
+        else if (bar_type == CENTER_BAR)
+            y = wa.height/2 - mh;
+        else
+            y = info[i].height - mh;
+		mw = wa.width/2;
 	}
+
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 	inputw = MIN(inputw, mw/3);
 	match();
@@ -706,7 +722,11 @@ main(int argc, char *argv[])
 			puts("dmenu-"VERSION);
 			exit(0);
 		} else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
-			topbar = 0;
+            bar_type = BOTTOM_BAR;
+		else if (!strcmp(argv[i], "-c"))   /* appears at the top of the screen */
+            bar_type = CENTER_BAR;
+		else if (!strcmp(argv[i], "-t"))   /* appears at the center of the screen */
+            bar_type = CENTER_BAR;
 		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
 			fast = 1;
 		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
