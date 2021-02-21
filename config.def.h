@@ -1,8 +1,10 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
-enum BarType bar_type = CENTER_BAR;
-float bar_width_fact = 0.5;
+static enum BarType bar_type = CENTER_BAR;
+static float bar_width_fact = 0.5;
+
+static int borderwidth = 1;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static const char *fonts[] = {

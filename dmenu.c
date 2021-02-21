@@ -675,11 +675,12 @@ setup(void)
 	swa.override_redirect = True;
 	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
-	win = XCreateWindow(dpy, parentwin, x, y, mw, mh, 0,
+	win = XCreateWindow(dpy, parentwin, x, y, mw, mh, borderwidth,
 	                    CopyFromParent, CopyFromParent, CopyFromParent,
 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
+    XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
 	XSetClassHint(dpy, win, &ch);
-
+    //TODO: add to usage TOP BAR & enable border
 
 	/* input methods */
 	if ((xim = XOpenIM(dpy, NULL, NULL, NULL)) == NULL)
@@ -726,9 +727,11 @@ main(int argc, char *argv[])
 		else if (!strcmp(argv[i], "-c"))   /* appears at the top of the screen */
             bar_type = CENTER_BAR;
 		else if (!strcmp(argv[i], "-t"))   /* appears at the center of the screen */
-            bar_type = CENTER_BAR;
+            bar_type = TOP_BAR;
 		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
 			fast = 1;
+		else if (!strcmp(argv[i], "-wb"))   /* grabs keyboard before reading stdin */
+			borderwidth = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
 			fstrncmp = strncasecmp;
 			fstrstr = cistrstr;
