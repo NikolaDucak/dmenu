@@ -642,14 +642,14 @@ setup(void)
 				if (INTERSECT(x, y, 1, 1, info[i]))
 					break;
 
-		x = info[i].x_org + (info[i].width*bar_width_fact)/2;
-        if (bar_type == TOP_BAR) 
+		mw = info[i].width * widthfact;
+		x  = info[i].x_org + (info[i].width-mw)/2 - borderwidth;
+        if (bartype == TOP_BAR) 
             y = info[i].y_org;
-        else if (bar_type == CENTER_BAR)
+        else if (bartype == CENTER_BAR)
             y = info[i].y_org + info[i].height/2 - mh;
         else
             y = info[i].y_org + (info[i].height - mh);
-		mw = info[i].width/2;
 		XFree(info);
 	} else
 #endif
@@ -657,14 +657,15 @@ setup(void)
 		if (!XGetWindowAttributes(dpy, parentwin, &wa))
 			die("could not get embedding window attributes: 0x%lx",
 			    parentwin);
-		x = wa.width * bar_width_fact;
-        if (bar_type == TOP_BAR)
+        //TODO: check
+		mw = wa.width * widthfact;
+		x  = (wa.width - mw)/2 - borderwidth;
+        if (bartype == TOP_BAR)
             y = 0;
-        else if (bar_type == CENTER_BAR)
+        else if (bartype == CENTER_BAR)
             y = wa.height/2 - mh;
         else
             y = info[i].height - mh;
-		mw = wa.width/2;
 	}
 
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
@@ -680,7 +681,6 @@ setup(void)
 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
     XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
 	XSetClassHint(dpy, win, &ch);
-    //TODO: add to usage TOP BAR & enable border
 
 	/* input methods */
 	if ((xim = XOpenIM(dpy, NULL, NULL, NULL)) == NULL)
@@ -706,8 +706,8 @@ setup(void)
 static void
 usage(void)
 {
-	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
+	fputs("usage: dmenu [-bctfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid] [-mw width] [-bw border px]\n", stderr);
 	exit(1);
 }
 
@@ -723,15 +723,13 @@ main(int argc, char *argv[])
 			puts("dmenu-"VERSION);
 			exit(0);
 		} else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
-            bar_type = BOTTOM_BAR;
+            bartype = BOTTOM_BAR;
 		else if (!strcmp(argv[i], "-c"))   /* appears at the top of the screen */
-            bar_type = CENTER_BAR;
+            bartype = CENTER_BAR;
 		else if (!strcmp(argv[i], "-t"))   /* appears at the center of the screen */
-            bar_type = TOP_BAR;
+            bartype = TOP_BAR;
 		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
 			fast = 1;
-		else if (!strcmp(argv[i], "-wb"))   /* grabs keyboard before reading stdin */
-			borderwidth = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
 			fstrncmp = strncasecmp;
 			fstrstr = cistrstr;
@@ -756,6 +754,13 @@ main(int argc, char *argv[])
 			colors[SchemeSel][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
+		else if (!strcmp(argv[i], "-bw"))   /* border width */
+			borderwidth = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-mw")) { /* menu bar width (monitor width percentage) */
+			widthfact = atoi(argv[++i]);
+            widthfact = (widthfact > 100) ? 100 : ((widthfact < 10) ? 10 : widthfact);
+            widthfact = (float)widthfact / 100;
+        }
 		else
 			usage();
 

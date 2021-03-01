@@ -1,10 +1,15 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
-static enum BarType bar_type = CENTER_BAR;
-static float bar_width_fact = 0.5;
+/* postion of the menu on y axis */
+static enum BarType bartype = CENTER_BAR;
 
+/* menu width as percentage of monitor width (menu will be centered on x axis) */
+static float widthfact = 0.5;
+
+/* width in pixels for menu window border */
 static int borderwidth = 1;
+
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static const char *fonts[] = {

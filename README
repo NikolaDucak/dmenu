@@ -1,7 +1,12 @@
-dmenu - dynamic menu
+modified dmenu
 ====================
-dmenu is an efficient dynamic menu for X.
+This is a modified version of dmenu (an efficient dynamic menu for X).
 
+Modifications
+-------------
+- customizible menu width
+- centered position
+- window border with customizible width
 
 Requirements
 ------------
